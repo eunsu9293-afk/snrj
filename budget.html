@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="내 가계부">
+<title>내 가계부</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif; background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%); min-height: 100vh; color: #e8e8f0; padding: 24px 16px 80px; }
+  header { text-align: center; margin-bottom: 24px; }
+  header h1 { font-size: 26px; font-weight: 800; background: linear-gradient(90deg, #a78bfa, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  header p { color: #6b7280; font-size: 13px; margin-top: 4px; }
+  .summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 14px 8px; text-align: center; }
+  .card.income { border: 1px solid rgba(52,211,153,0.3); }
+  .card.expense { border: 1px solid rgba(248,113,113,0.3); }
+  .card.balance { border: 1px solid rgba(96,165,250,0.3); }
+  .card-label { font-size: 10px; color: #9ca3af; margin-bottom: 6px; }
+  .card.income .card-amount { color: #34d399; }
+  .card.expense .card-amount { color: #f87171; }
+  .card.balance .card-amount { color: #60a5fa; }
+  .card-amount { font-size: 14px; font-weight: 700; word-break: keep-all; }
+  .card-amount.negative { color: #fb923c !important; }
+  .panel { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px; margin-bottom: 16px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+  .tab-btn { flex: 1; padding: 11px 0; border-radius: 12px; border: none; cursor: pointer; font-weight: 700; font-size: 14px; font-family: 'Noto Sans KR', sans-serif; background: rgba(255,255,255,0.06); color: #6b7280; transition: all 0.2s; }
+  .tab-btn.active { background: linear-gradient(135deg, #7c3aed, #3b82f6); color: #fff; }
+  label { font-size: 12px; color: #9ca3af; display: block; margin-bottom: 6px; }
+  input, select { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 12px 14px; color: #e8e8f0; font-size: 15px; outline: none; margin-bottom: 12px; font-family: 'Noto Sans KR', sans-serif; appearance: none; }
+  select { background-color: #1e1e35; }
+  input::placeholder { color: #4b5563; }
+  .add-btn { width: 100%; padding: 13px 0; border-radius: 12px; border: none; cursor: pointer; font-weight: 800; font-size: 15px; background: linear-gradient(135deg, #7c3aed, #3b82f6); color: #fff; font-family: 'Noto Sans KR', sans-serif; }
+  .section-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .section-title { font-size: 14px; font-weight: 700; color: #a78bfa; }
+  .reset-btn { padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(251,146,60,0.4); background: rgba(251,146,60,0.12); color: #fb923c; font-size: 11px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; white-space: nowrap; }
+  .filter-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .filter-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: #6b7280; font-size: 12px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+  .filter-btn.active { background: rgba(167,139,250,0.2); border-color: #a78bfa; color: #a78bfa; }
+  .record { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .record:last-child { border-bottom: none; }
+  .record-left { display: flex; align-items: center; gap: 10px; }
+  .badge { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .badge.income { background: rgba(52,211,153,0.15); }
+  .badge.expense { background: rgba(248,113,113,0.15); }
+  .record-desc { font-size: 14px; font-weight: 600; color: #e8e8f0; }
+  .record-meta { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .record-right { display: flex; align-items: center; gap: 6px; }
+  .record-amount { font-size: 15px; font-weight: 700; }
+  .record-amount.income { color: #34d399; }
+  .record-amount.expense { color: #f87171; }
+  .del-btn { background: none; border: none; color: #4b5563; cursor: pointer; font-size: 15px; padding: 4px; }
+  .empty { text-align: center; color: #4b5563; padding: 28px 0; font-size: 13px; line-height: 1.8; }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(52,211,153,0.9); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; z-index: 999; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>💰 내 가계부</h1>
+  <p id="current-month"></p>
+</header>
+<div class="summary">
+  <div class="card income"><div class="card-label">총 입금</div><div class="card-amount" id="total-income">0원</div></div>
+  <div class="card expense"><div class="card-label">총 지출</div><div class="card-amount" id="total-expense">0원</div></div>
+  <div class="card balance"><div class="card-label">잔액</div><div class="card-amount" id="balance">0원</div></div>
+</div>
+<div class="panel">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('income')">＋ 입금</button>
+    <button class="tab-btn" onclick="switchTab('expense')">－ 지출</button>
+  </div>
+  <div id="income-form">
+    <label>입금 내용</label>
+    <input type="text" id="income-desc" placeholder="예: 월급, 용돈, 부수입..." />
+    <label>금액 (원)</label>
+    <input type="number" id="income-amt" placeholder="예: 2000000" />
+    <button class="add-btn" onclick="addIncome()">입금 추가</button>
+  </div>
+  <div id="expense-form" style="display:none">
+    <label>물품 / 내용</label>
+    <input type="text" id="expense-item" placeholder="예: 아메리카노, 버스비, 운동화..." />
+    <label>카테고리</label>
+    <select id="expense-cat">
+      <option>식비</option><option>교통</option><option>쇼핑</option><option>의료</option><option>문화</option><option>기타</option>
+    </select>
+    <label>금액 (원)</label>
+    <input type="number" id="expense-amt" placeholder="예: 4500" />
+    <button class="add-btn" onclick="addExpense()">지출 추가</button>
+  </div>
+</div>
+<div class="panel">
+  <div class="section-title-row">
+    <div class="section-title">📋 거래 내역 (<span id="record-count">0</span>건)</div>
+    <button class="reset-btn" onclick="resetAmounts()">↺ 금액 초기화</button>
+  </div>
+  <div class="filter-tabs">
+    <button class="filter-btn active" onclick="setFilter('all',event)">전체</button>
+    <button class="filter-btn" onclick="setFilter('income',event)">입금</button>
+    <button class="filter-btn" onclick="setFilter('expense',event)">지출</button>
+  </div>
+  <div id="records-list"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+  let records=JSON.parse(localStorage.getItem('gaegyebu')||'[]');
+  let currentFilter='all',currentTab='income';
+  document.getElementById('current-month').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long'});
+  function save(){localStorage.setItem('gaegyebu',JSON.stringify(records));}
+  function fmt(n){return n.toLocaleString('ko-KR')+'원';}
+  function switchTab(tab){currentTab=tab;document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&tab==='income')||(i===1&&tab==='expense')));document.getElementById('income-form').style.display=tab==='income'?'block':'none';document.getElementById('expense-form').style.display=tab==='expense'?'block':'none';}
+  function setFilter(f,e){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');render();}
+  function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+  function addIncome(){const desc=document.getElementById('income-desc').value.trim();const amt=parseInt(document.getElementById('income-amt').value,10);if(!desc){showToast('⚠️ 내용을 입력해주세요');return;}if(!amt||amt<=0){showToast('⚠️ 금액을 입력해주세요');return;}records.unshift({id:Date.now(),type:'income',desc,amount:amt,date:new Date().toLocaleDateString('ko-KR')});save();render();document.getElementById('income-desc').value='';document.getElementById('income-amt').value='';showToast('✅ 입금 추가됐어요!');}
+  function addExpense(){const item=document.getElementById('expense-item').value.trim();const cat=document.getElementById('expense-cat').value;const amt=parseInt(document.getElementById('expense-amt').value,10);if(!item){showToast('⚠️ 물품명을 입력해주세요');return;}if(!amt||amt<=0){showToast('⚠️ 금액을 입력해주세요');return;}records.unshift({id:Date.now(),type:'expense',desc:item,category:cat,amount:amt,date:new Date().toLocaleDateString('ko-KR')});save();render();document.getElementById('expense-item').value='';document.getElementById('expense-amt').value='';showToast('✅ 지출 추가됐어요!');}
+  function deleteRecord(id){if(!confirm('삭제할까요?'))return;records=records.filter(r=>r.id!==id);save();render();showToast('🗑️ 삭제됐어요');}
+  function resetAmounts(){if(records.length===0){showToast('초기화할 내역이 없어요');return;}if(!confirm('모든 기록은 그대로 두고 금액만 0원으로 초기화할까요?'))return;records=records.map(r=>({...r,amount:0}));save();render();showToast('↺ 금액이 초기화됐어요');}
+  function render(){const ti=records.filter(r=>r.type==='income').reduce((s,r)=>s+r.amount,0);const te=records.filter(r=>r.type==='expense').reduce((s,r)=>s+r.amount,0);const bal=ti-te;document.getElementById('total-income').textContent=fmt(ti);document.getElementById('total-expense').textContent=fmt(te);const balEl=document.getElementById('balance');balEl.textContent=fmt(bal);balEl.className='card-amount'+(bal<0?' negative':'');const filtered=currentFilter==='all'?records:records.filter(r=>r.type===currentFilter);document.getElementById('record-count').textContent=filtered.length;const list=document.getElementById('records-list');if(filtered.length===0){list.innerHTML='<div class="empty">내역이 없어요 😊<br>위에서 추가해보세요!</div>';return;}list.innerHTML=filtered.map(r=>`<div class="record"><div class="record-left"><div class="badge ${r.type}">${r.type==='income'?'💵':'🛍️'}</div><div><div class="record-desc">${r.desc}</div><div class="record-meta">${r.date}${r.category?' · '+r.category:''}</div></div></div><div class="record-right"><span class="record-amount ${r.type}">${r.type==='income'?'+':'-'}${fmt(r.amount)}</span><button class="del-btn" onclick="deleteRecord(${r.id})">✕</button></div></div>`).join('');}
+  render();
+</script>
+</body>
+</html>
